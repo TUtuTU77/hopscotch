@@ -1,26 +1,281 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
+/* ===== Hopscotch design tokens ===== */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --text:         #271810;
+  --muted:        rgba(55, 35, 18, 0.55);
+  --faint:        rgba(55, 35, 18, 0.40);
+  --accent:       #D4774A;
+  --accent-deep:  #C26B40;
+  --hover-glow:   rgba(200, 104, 64, 0.75);
+
+  --glass-fill:    rgba(255, 246, 240, 0.20);
+  --glass-fill-hi: rgba(255, 246, 240, 0.36);
+  --glass-border:  rgba(255, 255, 255, 0.52);
+  --divider:       rgba(255, 255, 255, 0.36);
+
+  --input-fill:   rgba(255, 246, 240, 0.30);
+  --input-border: rgba(255, 255, 255, 0.55);
+
+  --serif:   "Cormorant Garamond", Georgia, serif;
+  --sans:    "DM Sans", system-ui, sans-serif;
+  --display: "DM Serif Display", Georgia, serif;
+  --script:  "Kaushan Script", cursive;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  font-family: var(--sans);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Stage — 全屏容器，letterbox the 1440×900 frame */
+#stage {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: #2a2230;
+  overflow: hidden;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Frame — 固定 1440×900，背景图在这里 */
+#frame {
+  width: 1440px;
+  height: 900px;
+  position: relative;
+  overflow: hidden;
+  background-image: url("/bg.jpg");
+  background-size: cover;
+  background-position: center;
+  transform-origin: center center;
 }
+
+/* 轻微暖色调 overlay，让毛玻璃在背景各区域都可读 */
+#frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255,240,232,0.04), rgba(120,90,120,0.10));
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ===== 毛玻璃工具类 ===== */
+.glass {
+  background: var(--glass-fill);
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 8px 30px rgba(70, 45, 35, 0.10);
+}
+
+.glass-hover {
+  transition: transform .32s cubic-bezier(.2,.8,.25,1),
+              border-color .32s ease,
+              background .32s ease,
+              box-shadow .32s ease;
+}
+.glass-hover:hover {
+  transform: translateY(-6px);
+  border-color: var(--hover-glow);
+  background: var(--glass-fill-hi);
+  box-shadow: 0 18px 40px rgba(120, 70, 45, 0.18);
+}
+
+/* ===== 字体工具类 ===== */
+.serif { font-family: var(--serif); }
+.sans  { font-family: var(--sans); }
+.caps  {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+.muted { color: var(--muted); }
+
+/* ===== 输入框 ===== */
+.field {
+  width: 100%;
+  background: var(--input-fill);
+  border: 1px solid var(--input-border);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 14px;
+  padding: 11px 13px;
+  outline: none;
+  transition: border-color .2s ease, background .2s ease;
+}
+.field::placeholder { color: var(--faint); }
+.field:focus {
+  border-color: rgba(255,255,255,0.85);
+  background: rgba(255,246,240,0.40);
+}
+
+.field-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin-bottom: 7px;
+}
+
+/* ===== 按钮 ===== */
+.cta {
+  background: var(--accent);
+  color: #FFF6F0;
+  border: none;
+  border-radius: 14px;
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 12px 18px;
+  cursor: pointer;
+  transition: background .2s ease, transform .15s ease, box-shadow .2s ease;
+  box-shadow: 0 6px 18px rgba(212, 119, 74, 0.30);
+}
+.cta:hover {
+  background: var(--accent-deep);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(212,119,74,0.38);
+}
+.cta:active { transform: translateY(0); }
+
+.gbtn {
+  background: var(--glass-fill);
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 13px;
+  padding: 8px 13px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  transition: border-color .2s ease, background .2s ease;
+}
+.gbtn:hover {
+  border-color: var(--hover-glow);
+  background: var(--glass-fill-hi);
+}
+
+/* ===== Chips / Filter ===== */
+.chip {
+  background: rgba(255, 246, 240, 0.15);
+  border: 0.5px solid rgba(255, 255, 255, 0.40);
+  border-radius: 20px;
+  font-family: var(--sans);
+  font-size: 12px;
+  color: var(--text);
+  padding: 6px 13px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .2s ease, border-color .2s ease, color .2s ease;
+}
+.chip:hover { border-color: var(--hover-glow); background: rgba(255,246,240,0.30); }
+.chip.active {
+  background: rgba(38, 24, 14, 0.55);
+  color: #FFF6F0;
+  border-color: transparent;
+}
+
+/* ===== Tag pills ===== */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 500;
+  border-radius: 9px;
+  padding: 3px 9px;
+}
+.tag-nature   { background: rgba(122,158,110,0.30); color: #3a5230; }
+.tag-landmark { background: rgba(120,150,190,0.30); color: #2c3f5e; }
+.tag-food     { background: rgba(212,150,80,0.30);  color: #6a4416; }
+.tag-culture  { background: rgba(160,140,200,0.30); color: #463a64; }
+.tag-hiking   { background: rgba(122,158,110,0.30); color: #3a5230; }
+.tag-beach    { background: rgba(100,170,200,0.30); color: #1e4a5e; }
+.tag-shopping { background: rgba(200,150,160,0.30); color: #5e2a36; }
+.tag-night    { background: rgba(100,90,150,0.30);  color: #2e265a; }
+.tag-journey  { background: rgba(180,160,120,0.30); color: #4a3a18; }
+.tag-stay     { background: rgba(160,180,140,0.30); color: #2e4228; }
+.tag-festival { background: rgba(220,160,100,0.30); color: #5e3010; }
+.tag-slow     { background: rgba(180,200,160,0.30); color: #364828; }
+
+/* ===== Nav ===== */
+.navbar {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 64px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  padding: 0 32px;
+  gap: 28px;
+  background: var(--glass-fill);
+  border-bottom: 1px solid var(--glass-border);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+.nav-logo {
+  font-family: var(--display);
+  font-size: 18px;
+  cursor: pointer;
+}
+.nav-link {
+  font-size: 13px;
+  color: var(--muted);
+  cursor: pointer;
+  padding-bottom: 3px;
+  border-bottom: 1.5px solid transparent;
+  transition: color .2s ease, border-color .2s ease;
+}
+.nav-link:hover { color: var(--text); }
+.nav-link.active { color: var(--text); border-bottom-color: var(--hover-glow); }
+
+.pill-new {
+  background: var(--accent);
+  color: #FFF6F0;
+  border: none;
+  border-radius: 20px;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 16px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background .2s ease, transform .15s ease;
+  box-shadow: 0 4px 14px rgba(212,119,74,0.28);
+}
+.pill-new:hover { background: var(--accent-deep); transform: translateY(-1px); }
+
+/* ===== 页面动画 ===== */
+@keyframes screenIn {
+  from { transform: translateY(10px); }
+  to   { transform: translateY(0); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .screen { animation: screenIn .45s cubic-bezier(.2,.8,.25,1); }
+}
+.screen { position: absolute; inset: 0; z-index: 1; }
+
+/* ===== 滚动条 ===== */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-thumb { background: rgba(120,90,70,0.25); border-radius: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
