@@ -57,8 +57,18 @@ export default function EditClient({ record }) {
   const [error,        setError]        = useState('')
   const [existCover,   setExistCover]   = useState(record.cover_photo_url || '')
   const [newCoverIdx,  setNewCoverIdx]  = useState(null)
+  const [deletedPhotoIds, setDeletedPhotoIds] = useState([])
 
   const toggleTag    = (t) => setTags(s => ({ ...s, [t]: !s[t] }))
+  const markDelete = (photoId, photoUrl) => {
+    setDeletedPhotoIds(prev => [...prev, photoId])
+    if (existCover === photoUrl) {
+      const remaining = existingPhotos.filter(
+        p => !deletedPhotoIds.includes(p.id) && p.id !== photoId
+      )
+      setExistCover(remaining[0]?.url || '')
+    }
+  }
   const handleFiles  = (incoming) => {
     const arr = Array.from(incoming)
     setNewFiles(p => [...p, ...arr])
@@ -106,6 +116,10 @@ if (newCoverIdx !== null && uploaded[newCoverIdx]) {
 }
 payload.cover_photo_url = finalCover
 
+      // 删除标记的照片
+if (deletedPhotoIds.length > 0) {
+  await supabase.from('photos').delete().in('id', deletedPhotoIds)
+}
       const { error: updateErr } = await supabase
         .from('records').update(payload).eq('id', record.id)
       if (updateErr) throw updateErr
@@ -173,24 +187,35 @@ payload.cover_photo_url = finalCover
             </div>
 
             {/* Existing photos (read-only preview) */}
-            {existingPhotos.map(p => {
-  const isCover = newCoverIdx === null && existCover === p.url
-  return (
-    <div key={p.id} onClick={() => { setExistCover(p.url); setNewCoverIdx(null) }}
-      style={{ width:80, height:60, borderRadius:8, overflow:'hidden',
-        position:'relative', cursor:'pointer',
-        border: isCover ? '2px solid var(--accent)' : '1px solid var(--glass-border)',
-        transition:'border-color .2s ease' }}>
-      <img src={p.url} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
-      {isCover && (
-        <span style={{ position:'absolute', bottom:2, left:2, fontSize:9,
-          background:'var(--accent)', color:'#fff', borderRadius:3, padding:'1px 4px' }}>
-          cover
-        </span>
-      )}
-    </div>
-  )
-})}
+            {existingPhotos
+  .filter(p => !deletedPhotoIds.includes(p.id))
+  .map(p => {
+    const isCover = newCoverIdx === null && existCover === p.url
+    return (
+      <div key={p.id} onClick={() => { setExistCover(p.url); setNewCoverIdx(null) }}
+        style={{ width:80, height:60, borderRadius:8, overflow:'hidden',
+          position:'relative', cursor:'pointer',
+          border: isCover ? '2px solid var(--accent)' : '1px solid var(--glass-border)',
+          transition:'border-color .2s ease' }}>
+        <img src={p.url} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+        {isCover && (
+          <span style={{ position:'absolute', bottom:2, left:2, fontSize:9,
+            background:'var(--accent)', color:'#fff', borderRadius:3, padding:'1px 4px' }}>
+            cover
+          </span>
+        )}
+        <button type="button"
+          onClick={e => { e.stopPropagation(); markDelete(p.id, p.url) }}
+          style={{ position:'absolute', top:2, right:2, width:16, height:16,
+            background:'rgba(0,0,0,0.5)', border:'none', borderRadius:'50%',
+            color:'#fff', fontSize:10, cursor:'pointer',
+            display:'flex', alignItems:'center', justifyContent:'center' }}>
+          ✕
+        </button>
+      </div>
+    )
+  })
+}
 
             {/* Add more photos */}
             <div>
