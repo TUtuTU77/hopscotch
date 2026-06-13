@@ -257,11 +257,11 @@ export default function JournalClient({ records }) {
             <div className="muted" style={{ fontSize:14, marginTop:8 }}>Try a different filter or search term.</div>
           </div>
         ) : (
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:20, marginTop:22 }}>
-            {filtered.map(rec => (
-              <RecordCard key={rec.id} record={rec} onClick={() => navigate(rec.id)} />
-            ))}
-          </div>
+          <div className="journal-grid">
+  {filtered.map(rec => (
+    <RecordCard key={rec.id} record={rec} onClick={() => navigate(rec.id)} />
+  ))}
+</div>
         )}
 
       </div>

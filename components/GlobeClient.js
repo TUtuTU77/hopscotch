@@ -214,6 +214,20 @@ function GlobeViz({ cities, active, setActive, D, onPinClick }) {
 
 export default function GlobeClient({ cities, stats }) {
   const router = useRouter()
+  const [globeD, setGlobeD] = useState(520)
+const [isMobile, setIsMobile] = useState(false)
+
+useEffect(() => {
+  const update = () => {
+    const w = window.innerWidth
+    if (w < 640)       { setGlobeD(Math.min(w - 32, 300)); setIsMobile(true)  }
+    else if (w < 1024) { setGlobeD(380);                    setIsMobile(false) }
+    else               { setGlobeD(520);                    setIsMobile(false) }
+  }
+  update()
+  window.addEventListener('resize', update)
+  return () => window.removeEventListener('resize', update)
+}, [])
   const [active, setActive] = useState(cities[0]?.id || null)
 
   if (cities.length === 0) {
@@ -233,20 +247,26 @@ export default function GlobeClient({ cities, stats }) {
   return (
     <div className="screen">
       <Navbar />
-      <div style={{ position:'absolute', inset:'64px 0 0 0',
-        display:'flex', alignItems:'center', justifyContent:'center',
-        gap:64, padding:'0 60px' }}>
+      <div style={{
+  position:'absolute', inset:'64px 0 0 0', overflowY:'auto',
+  display:'flex',
+  flexDirection: isMobile ? 'column' : 'row',
+  alignItems: 'center',
+  justifyContent: isMobile ? 'flex-start' : 'center',
+  gap: isMobile ? 16 : 64,
+  padding: isMobile ? '24px 16px 40px' : '0 60px',
+}}>
 
         <GlobeViz
           cities={cities}
           active={active}
           setActive={setActive}
-          D={560}
+          D={globeD}
           onPinClick={(id) => router.push(`/journal/${id}`)}
         />
 
         {/* Stats panel */}
-        <div className="glass" style={{ width:248, padding:'22px 22px' }}>
+        <div className="glass" style={{ width: isMobile ? '100%' : 248, padding:'22px 22px' }}>
           <div className="caps" style={{ marginBottom:14 }}>Your journey so far</div>
           {stats.map(([label, val, accent], i) => (
             <div key={label} style={{

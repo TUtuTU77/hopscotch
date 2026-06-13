@@ -20,7 +20,7 @@ export default function Navbar() {
   return (
     <div className="navbar">
       <div className="nav-logo" onClick={() => router.push('/')}>Hopscotch</div>
-      <span style={{
+      <span className="nav-tagline" style={{
         fontFamily: 'var(--script)', fontSize: 17, color: 'rgba(199,107,64,0.82)',
         marginLeft: 18, whiteSpace: 'nowrap', transform: 'translateY(2px)', display: 'inline-block',
       }}>
